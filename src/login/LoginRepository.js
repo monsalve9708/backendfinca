@@ -1,8 +1,9 @@
-import cliente from '../util/databaseconection '
-import loginquery from '../util/querys'
+const client = require("../util/databaseconection")
+const loginQuery = require('../util/querys')
 
-cliente.connect()
-const login = cliente.query(loginquery,(err,res) =>{
-    console.log(err,res);
-    cliente.end();
-});
+client.connect();
+const login  = (values) => {
+   return client.query(loginQuery, [values]);
+}
+
+module.exports = login;
