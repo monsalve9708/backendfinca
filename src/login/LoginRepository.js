@@ -1,9 +1,17 @@
-const client = require("../util/databaseconection")
-const loginQuery = require('../util/querys')
+const {Client} = require('pg')
+const {loginQuery} = require('../util/querys')
 
-client.connect();
-const login  = (values) => {
-   return client.query(loginQuery, [values]);
+const login  = async (values) => {
+   const client = new Client();
+   client.connect();
+   try {
+   return  await client.query(loginQuery, [values])
+       .then(data => data.rows[0]);
+   }catch (e){
+      console.error(e);
+   }finally {
+      client.end();
+   }
 }
 
 module.exports = login;

@@ -1,4 +1,3 @@
-console.clear();
 require("dotenv").config();
 const jwt=require('jsonwebtoken');
 const express = require('express');
@@ -6,22 +5,19 @@ const login = require("./login/LoginRepository");
 const bcrypt = require('bcrypt');
 const app = express();
 const userSchema = require("./model/user");
-const auth= require("./middleware/auth");
+const CryptoJS = require("crypto-js");
+const key = require("./util/key");
 
-app.post("/hello",auth("admin"),(req,res) => {
-    res.send("Hello");
-});
 app.post("/login", async (req,res) => {
     try{
-        const {user, password} = req.body;
+        let {user, password} = req.body;
+        password = CryptoJS.AES.decrypt(password,key)
+            .toString(CryptoJS.enc.Utf8);
 
        if (!(user && password)){
            return res.status(400).send("Hace falta algun campo");
         }
-       let userDb;
-        await login(user).then(data => {
-            userDb = data.rows[0];
-        }, err => {console.error(err)});
+       const userDb = await login(user);
         if (userDb && await bcrypt.compare(password, userDb.contrasena) ){
 
             const token = jwt.sign(
@@ -39,13 +35,12 @@ app.post("/login", async (req,res) => {
 
            return res.status(200).json(userSchema);
         }
-           return res.status(401).send("Credenciales incorrectas");
+           return res.status(401).send({error:"Credenciales incorrectas"});
     }catch (err){
         console.log(err)
     }
 
 });
-app.use(express.json());
 
 
 module.exports = app;
