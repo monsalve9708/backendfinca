@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 
 const config = process.env;
-function roles(role){
+function roles(role) {
     return (req, res, next) => {
         const token =
             req.body.token || req.query.token || req.headers["x-access-token"];
@@ -12,7 +12,7 @@ function roles(role){
         try {
             const decoded = jwt.verify(token, config.TOKEN_KEY);
             req.user = decoded;
-            if (!(req.user.type_user === role)) return res.status(401).send("El usuario no tiene permisos a este recurso");
+            if (!(role.includes(req.user.type_user))) return res.status(401).send("El usuario no tiene permisos a este recurso");
         } catch (err) {
             return res.status(401).send("Token Invalido");
         }
